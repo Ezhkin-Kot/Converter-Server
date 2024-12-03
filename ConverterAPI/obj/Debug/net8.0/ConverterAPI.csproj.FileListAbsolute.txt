@@ -24,3 +24,10 @@
 /Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/Debug/net8.0/ConverterAPI.pdb
 /Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/Debug/net8.0/ConverterAPI.genruntimeconfig.cache
 /Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/Debug/net8.0/ref/ConverterAPI.dll
+/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/bin/Debug/net8.0/Microsoft.OpenApi.dll
+/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/bin/Debug/net8.0/Swashbuckle.AspNetCore.Swagger.dll
+/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll
+/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/Debug/net8.0/ConverterAPI.csproj.AssemblyReference.cache
+/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/Debug/net8.0/ConverterAPI.MvcApplicationPartsAssemblyInfo.cs
+/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/Debug/net8.0/Converte.EA788348.Up2Date
