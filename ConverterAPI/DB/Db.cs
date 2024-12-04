@@ -1,4 +1,4 @@
-namespace ConverterAPI;
+namespace ConverterAPI.DB;
 
 public record User
 {
