@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using ConverterAPI.DB;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/users", () => UserDb.GetUsers());
+app.MapPost("/users", (User user) => UserDb.CreateUser(user));
+app.MapPut("/users", (User user) => UserDb.UpdateUser(user));
+app.MapDelete("/users/{id}", (int id) => UserDb.RemoveUser(id));
 
 app.Run();
