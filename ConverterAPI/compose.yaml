@@ -1,0 +1,30 @@
+﻿networks:
+  converterapi-dev:
+    driver: bridge
+services:
+  app:
+    container_name: converterapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - converterapi-dev
+    depends_on:
+      - aboba_db
+  aboba_db:
+    container_name: AbobaDB
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: aboba
+      POSTGRES_PASSWORD: aboba123
+      POSTGRES_DB: Aboba
+    ports:
+      - "5432:5432"
+    networks:
+      - converterapi-dev
+    volumes:
+      - aboba-data:/var/lib/postgresql/data
+volumes:
+  aboba-data:

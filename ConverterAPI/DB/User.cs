@@ -1,6 +1,6 @@
 namespace ConverterAPI.DB;
 
-public record User
+public record UserDb
 {
     public int Id { get; set; }
     public string? Login { get; set; }
@@ -8,27 +8,27 @@ public record User
     public bool Premium { get; set; }
 }
 
-public class UserDb
+public class User
 {
-    private static List<User> _users = new List<User>();
+    private static List<UserDb> _users = new List<UserDb>();
 
-    public static List<User> GetUsers()
+    public static List<UserDb> GetUsers()
     {
         return _users;
     }
 
-    public static User? GetUser(int id)
+    public static UserDb? GetUser(int id)
     {
         return _users.SingleOrDefault(user => user.Id == id);
     }
 
-    public static User CreateUser(User user)
+    public static UserDb CreateUser(UserDb userDb)
     {
-        _users.Add(user);
-        return user;
+        _users.Add(userDb);
+        return userDb;
     }
 
-    public static User UpdateUser(User update)
+    public static UserDb UpdateUser(UserDb update)
     {
         _users = _users.Select(user =>
         {
