@@ -17,11 +17,11 @@ services:
     container_name: AbobaDB
     image: postgres:latest
     environment:
-      POSTGRES_USER: aboba
-      POSTGRES_PASSWORD: aboba123
-      POSTGRES_DB: Aboba
+      POSTGRES_USER: "aboba"
+      POSTGRES_PASSWORD: "aboba123"
+      POSTGRES_DB: "Aboba"
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - converterapi-dev
     volumes:
