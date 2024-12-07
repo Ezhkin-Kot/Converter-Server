@@ -1,6 +1,9 @@
-@ConverterAPI_HostAddress = http://localhost:5050
+POST http://localhost:5050/users
+Content-Type: application/json
 
-GET {{ConverterAPI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
+{
+  "id": 1,
+  "login": "aboba",
+  "password": "aboba123",
+  "premium": true
+}
