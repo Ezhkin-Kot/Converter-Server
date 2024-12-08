@@ -1,3 +1,7 @@
+using System.Data;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+
 namespace ConverterAPI.DB;
 using ConverterAPI;
 using System;
@@ -15,54 +19,113 @@ public class User
 {
     // Get the connection string
     private static string _connectionString = ConfigurationHelper.GetConnectionString("DefaultConnection");
-    private static List<UserDb> _users = new List<UserDb>();
 
-    public static async Task<List<UserDb>> GetUsers()
+    public static async Task<JsonResult> GetUsers()
     {
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-        await using var command = new NpgsqlCommand("SELECT * FROM users");
-        return _users;
-    }
-
-    public static async Task<UserDb?> GetUser(int id)
-    {
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-        await using var command = new NpgsqlCommand("SELECT * FROM users WHERE id = @id");
-        return _users.SingleOrDefault(user => user.Id == id);
-    }
-
-    public static async Task<UserDb> CreateUser(UserDb userDb)
-    {
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-        await using var command = new NpgsqlCommand("INSERT INTO users (login, password) VALUES (@login, @password)");
-        _users.Add(userDb);
-        return userDb;
-    }
-
-    public static async Task<UserDb> UpdateUser(UserDb update)
-    {
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-        _users = _users.Select(user =>
+        var table = new DataTable();
+        await using (var connection = new NpgsqlConnection(_connectionString))
         {
-            if (user.Id == update.Id)
+            await connection.OpenAsync();
+            await using (var command = new NpgsqlCommand("SELECT * FROM users", connection))
             {
-                user.Login = update.Login;
-                user.Password = update.Password;
-                user.Premium = update.Premium;
+                var reader = await command.ExecuteReaderAsync();
+                table.Load(reader);
+                
+                await reader.CloseAsync();
+                await connection.CloseAsync();
             }
-            return user;
-        }).ToList();
-        return update;
+        }
+        
+        return new JsonResult(table);
     }
 
-    public static async void RemoveUser(int id)
+    public static async Task<JsonResult> GetUser(int id)
     {
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-        _users = _users.FindAll(user => user.Id != id).ToList();
+        var table = new DataTable();
+        await using (var connection = new NpgsqlConnection(_connectionString))
+        {
+            await connection.OpenAsync();
+            await using (var command = new NpgsqlCommand("SELECT * FROM users WHERE id = @id", connection))
+            {
+                command.Parameters.AddWithValue("id", id);
+                
+                var reader = await command.ExecuteReaderAsync();
+                table.Load(reader);
+                
+                await reader.CloseAsync();
+                await connection.CloseAsync();
+            }
+        }
+        
+        return new JsonResult(table);
+    }
+
+    public static async Task<JsonResult> CreateUser(string jsonString)
+    {
+        var userDb = JsonSerializer.Deserialize<UserDb>(jsonString);
+        var table = new DataTable();
+        await using (var connection = new NpgsqlConnection(_connectionString))
+        {
+            await connection.OpenAsync();
+            await using (var command = new NpgsqlCommand("INSERT INTO users (login, password) VALUES (@login, @password)", connection))
+            {
+                command.Parameters.AddWithValue("login", userDb.Login);
+                command.Parameters.AddWithValue("password", userDb.Password);
+                
+                var reader = await command.ExecuteReaderAsync();
+                table.Load(reader);
+                
+                await reader.CloseAsync();
+                await connection.CloseAsync();
+            }
+        }
+        
+        return new JsonResult("User created");
+    }
+
+    public static async Task<JsonResult> UpdateUser(string jsonString)
+    {
+        var update = JsonSerializer.Deserialize<UserDb>(jsonString);
+        var table = new DataTable();
+        await using (var connection = new NpgsqlConnection(_connectionString))
+        {
+            await connection.OpenAsync();
+            await using (var command = new NpgsqlCommand("UPDATE users SET login = @login, password = @password premium = @premium WHERE id = @id", connection))
+            {
+                command.Parameters.AddWithValue("id", update.Id);
+                command.Parameters.AddWithValue("login", update.Login);
+                command.Parameters.AddWithValue("password", update.Password);
+                command.Parameters.AddWithValue("premium", update.Premium);
+                
+                var reader = await command.ExecuteReaderAsync();
+                table.Load(reader);
+                
+                await reader.CloseAsync();
+                await connection.CloseAsync();
+            }
+        }
+        
+        return new JsonResult("User updated");
+    }
+
+    public static async Task<JsonResult> RemoveUser(int id)
+    {
+        var table = new DataTable();
+        await using (var connection = new NpgsqlConnection(_connectionString))
+        {
+            await connection.OpenAsync();
+            await using (var command = new NpgsqlCommand("DELETE FROM users WHERE id = @id", connection))
+            {
+                command.Parameters.AddWithValue("id", id);
+                
+                var reader = await command.ExecuteReaderAsync();
+                table.Load(reader);
+                
+                await reader.CloseAsync();
+                await connection.CloseAsync();
+            }
+        }
+        
+        return new JsonResult("User deleted");
     }
 }
