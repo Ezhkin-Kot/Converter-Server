@@ -1,4 +1,7 @@
 namespace ConverterAPI.DB;
+using ConverterAPI;
+using System;
+using Npgsql;
 
 public record UserDb
 {
@@ -10,26 +13,39 @@ public record UserDb
 
 public class User
 {
+    // Get the connection string
+    private static string _connectionString = ConfigurationHelper.GetConnectionString("DefaultConnection");
     private static List<UserDb> _users = new List<UserDb>();
 
-    public static List<UserDb> GetUsers()
+    public static async Task<List<UserDb>> GetUsers()
     {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("SELECT * FROM users");
         return _users;
     }
 
-    public static UserDb? GetUser(int id)
+    public static async Task<UserDb?> GetUser(int id)
     {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("SELECT * FROM users WHERE id = @id");
         return _users.SingleOrDefault(user => user.Id == id);
     }
 
-    public static UserDb CreateUser(UserDb userDb)
+    public static async Task<UserDb> CreateUser(UserDb userDb)
     {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand("INSERT INTO users (login, password) VALUES (@login, @password)");
         _users.Add(userDb);
         return userDb;
     }
 
-    public static UserDb UpdateUser(UserDb update)
+    public static async Task<UserDb> UpdateUser(UserDb update)
     {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
         _users = _users.Select(user =>
         {
             if (user.Id == update.Id)
@@ -43,8 +59,10 @@ public class User
         return update;
     }
 
-    public static void RemoveUser(int id)
+    public static async void RemoveUser(int id)
     {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
         _users = _users.FindAll(user => user.Id != id).ToList();
     }
 }
