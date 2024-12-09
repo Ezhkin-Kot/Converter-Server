@@ -53,8 +53,8 @@ public static class UserDb
 
             if (user != null)
             {
-                user.login = updatedUser.login;
-                user.password = updatedUser.password;
+                user.login = updatedUser.login ?? user.login;
+                user.password = updatedUser.password ?? user.password;
                 user.premium = updatedUser.premium;
 
                 context.Users.Update(user);
