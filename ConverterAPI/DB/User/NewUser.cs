@@ -4,5 +4,5 @@ public record NewUser
 {
     public string? login { get; set; }
     public string? password { get; set; }
-    public bool premium { get; set; }
+    public bool? premium { get; set; }
 }
