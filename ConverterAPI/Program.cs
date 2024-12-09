@@ -1,9 +1,5 @@
-using ConverterAPI;
-using System.Threading.Tasks.Sources;
-using Microsoft.OpenApi.Models;
-using ConverterAPI.DB;
+using ConverterAPI.DB.User;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +16,10 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.MapGet("/users", () => User.GetUsers());
-app.MapGet("/users/{id:int}", (int id) => User.GetUser(id));
-app.MapPost("/users", (string newUser) => User.CreateUser(newUser));
-app.MapPut("/users", (string updUser) => User.UpdateUser(updUser));
-app.MapDelete("/users/{id:int}", (int id) => User.RemoveUser(id));
+app.MapGet("/users", () => UserDb.GetUsers());
+app.MapGet("/users/{id:int}", (int id) => UserDb.GetUserById(id));
+app.MapPost("/users", ([FromBody] NewUser newUser) => UserDb.CreateUser(newUser));
+app.MapPut("/users", ([FromBody] User updUser) => UserDb.UpdateUser(updUser));
+app.MapDelete("/users/{id:int}", (int id) => UserDb.DeleteUser(id));
 
 app.Run();
