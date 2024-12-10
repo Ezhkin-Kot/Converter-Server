@@ -1,10 +1,10 @@
-using System.Security.Cryptography;
-
 namespace ConverterAPI;
+
+using System.Security.Cryptography;
 
 public static class PasswordManager
 {
-    public static string HashPassword(string password)
+    public static string HashPassword(string? password)
     {
         byte[] salt;
         byte[] buffer2;
@@ -23,7 +23,7 @@ public static class PasswordManager
         return Convert.ToBase64String(dst);
     }
     
-    public static bool VerifyHashedPassword(string hashedPassword, string password)
+    public static bool VerifyHashedPassword(string? hashedPassword, string? password)
     {
         byte[] buffer4;
         if (hashedPassword == null)
