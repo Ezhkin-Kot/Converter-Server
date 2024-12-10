@@ -2,9 +2,9 @@ namespace ConverterAPI.DB.Session;
 
 public record Session()
 {
-    public int UserId { get; set; }
-    public int Sessionid { get; set; }
-    public DateTime Date { get; set; }
-    public int ConversionsAmount { get; set; }
-    public bool Active { get; set; }
+    public int sessionid { get; set; }
+    public int userid { get; set; }
+    public DateTime datetime { get; set; }
+    public int conversionsamount { get; set; }
+    public bool active { get; set; }
 }
