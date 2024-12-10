@@ -1,16 +1,15 @@
-namespace ConverterAPI.DB.User;
+namespace ConverterAPI.DB;
 
 using Microsoft.EntityFrameworkCore;
-using ConverterAPI.DB.Session;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Session> Sessions { get; set; }
+    public DbSet<User.User> Users { get; set; }
+    public DbSet<Session.Session> Sessions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().ToTable("users");
-        modelBuilder.Entity<Session>().ToTable("sessions");
+        modelBuilder.Entity<User.User>().ToTable("users");
+        modelBuilder.Entity<Session.Session>().ToTable("sessions");
     }
 }
