@@ -1,8 +1,8 @@
-namespace ConverterAPI.DB.User;
 using Microsoft.EntityFrameworkCore;
-using ConverterAPI;
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using ConverterAPI.DB.Session;
+
+namespace ConverterAPI.DB.User;
 
 public static class UserDb
 {
@@ -31,9 +31,9 @@ public static class UserDb
 
         if (newUser != null)
         {
-            user.login = newUser.login;
-            user.password = newUser.password;
-            user.premium = false;
+            user.Login = newUser.Login;
+            user.Password = PasswordManager.HashPassword(newUser.Password);
+            user.Premium = false;
 
             await using var context = new UserDbContext(Options);
             context.Users.Add(user);
@@ -49,13 +49,13 @@ public static class UserDb
         await using var context = new UserDbContext(Options);
         if (updatedUser != null)
         {
-            var user = await context.Users.FindAsync(updatedUser.id);
+            var user = await context.Users.FindAsync(updatedUser.Id);
 
             if (user != null)
             {
-                user.login = updatedUser.login ?? user.login;
-                user.password = updatedUser.password ?? user.password;
-                user.premium = updatedUser.premium;
+                user.Login = updatedUser.Login ?? user.Login;
+                user.Password = (updatedUser.Password != null) ? PasswordManager.HashPassword(updatedUser.Password) : user.Password;
+                user.Premium = updatedUser.Premium;
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();
