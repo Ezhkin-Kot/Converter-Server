@@ -1,5 +1,6 @@
-namespace ConverterAPI.DB.User;
 using Microsoft.EntityFrameworkCore;
+
+namespace ConverterAPI.DB.User;
 
 public class UserDbContext(DbContextOptions<UserDbContext> options) : DbContext(options)
 {
