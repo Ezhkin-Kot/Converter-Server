@@ -1,42 +1,47 @@
+namespace ConverterAPI.DB.User;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using ConverterAPI.DB.Session;
-
-namespace ConverterAPI.DB.User;
 
 public static class UserDb
 {
     private static readonly string ConnectionString = ConfigurationHelper.GetConnectionString("DefaultConnection");
 
     // Connection to DB
-    private static readonly DbContextOptions<UserDbContext> Options = new DbContextOptionsBuilder<UserDbContext>()
+    private static readonly DbContextOptions<ApplicationDbContext> Options = new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseNpgsql(ConnectionString)
         .Options;
 
     public static async Task<List<User>> GetUsers()
     {
-        await using var context = new UserDbContext(Options);
+        await using var context = new ApplicationDbContext(Options);
         return await context.Users.ToListAsync();
     }
 
     public static async Task<User?> GetUserById(int id)
     {
-        await using var context = new UserDbContext(Options);
+        await using var context = new ApplicationDbContext(Options);
         return await context.Users.FindAsync(id);
     }
 
     public static async Task<JsonResult> CreateUser(NewUser? newUser)
     {
-        var user = new User();
-
         if (newUser != null)
         {
-            user.Login = newUser.Login;
-            user.Password = PasswordManager.HashPassword(newUser.Password);
-            user.Premium = false;
-
-            await using var context = new UserDbContext(Options);
-            context.Users.Add(user);
+            await using var context = new ApplicationDbContext(Options);
+            var user = new User();
+            user.login = newUser.login;
+            (user.password, user.salt) = PasswordManager.HashPassword(newUser.password);
+            user.premium = false;
+            
+            var existUser = await context.Users.FirstOrDefaultAsync(u => u.login == user.login);
+            if (existUser != null)
+            {
+                return new JsonResult("User already exists");
+            }
+            
+            await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
             return new JsonResult("User successfully created");
@@ -46,16 +51,17 @@ public static class UserDb
 
     public static async Task<JsonResult> UpdateUser(User? updatedUser)
     {
-        await using var context = new UserDbContext(Options);
         if (updatedUser != null)
         {
-            var user = await context.Users.FindAsync(updatedUser.Id);
+            await using var context = new ApplicationDbContext(Options);
+            var user = await context.Users.FindAsync(updatedUser.id);
 
             if (user != null)
             {
-                user.Login = updatedUser.Login ?? user.Login;
-                user.Password = (updatedUser.Password != null) ? PasswordManager.HashPassword(updatedUser.Password) : user.Password;
-                user.Premium = updatedUser.Premium;
+                user.login = updatedUser.login ?? user.login;
+                (user.password, user.salt) = (updatedUser.password != null) ? 
+                    PasswordManager.HashPassword(updatedUser.password) : (user.password, user.salt);
+                user.premium = updatedUser.premium;
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();
@@ -69,7 +75,7 @@ public static class UserDb
 
     public static async Task<JsonResult> DeleteUser(int id)
     {
-        await using var context = new UserDbContext(Options);
+        await using var context = new ApplicationDbContext(Options);
         var user = await context.Users.FindAsync(id);
         if (user == null)
         {
