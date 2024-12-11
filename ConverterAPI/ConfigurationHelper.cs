@@ -1,4 +1,5 @@
 namespace ConverterAPI;
+
 using Microsoft.Extensions.Configuration;
 
 public static class ConfigurationHelper
