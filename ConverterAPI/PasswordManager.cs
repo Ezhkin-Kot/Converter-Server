@@ -1,52 +1,48 @@
 namespace ConverterAPI;
 
 using System.Security.Cryptography;
+using System.Text;
 
 public static class PasswordManager
 {
-    public static string HashPassword(string? password)
+    public static (string hash, string salt) HashPassword(string? password)
     {
-        byte[] salt;
-        byte[] buffer2;
         if (password == null)
         {
             throw new ArgumentNullException("password");
         }
-        using (Rfc2898DeriveBytes bytes = new Rfc2898DeriveBytes(password, 0x10, 0x3e8))
-        {
-            salt = bytes.Salt;
-            buffer2 = bytes.GetBytes(0x20);
-        }
-        byte[] dst = new byte[0x31];
-        Buffer.BlockCopy(salt, 0, dst, 1, 0x10);
-        Buffer.BlockCopy(buffer2, 0, dst, 0x11, 0x20);
-        return Convert.ToBase64String(dst);
+        
+        // Generate random salt
+        byte[] saltBytes = RandomNumberGenerator.GetBytes(16); // 16 bytes of salt
+        string salt = Convert.ToBase64String(saltBytes);
+
+        // Hash password with salt
+        using var hmac = new HMACSHA256(saltBytes);
+        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+        byte[] hashBytes = hmac.ComputeHash(passwordBytes);
+        string hash = Convert.ToBase64String(hashBytes);
+
+        return (hash, salt);
     }
     
-    public static bool VerifyHashedPassword(string? hashedPassword, string? password)
+    public static bool VerifyPassword(string? password, string? storedHash, string? storedSalt)
     {
-        byte[] buffer4;
-        if (hashedPassword == null)
+        if (storedHash == null || storedSalt == null)
         {
             return false;
         }
-        if (password == null)
-        {
-            throw new ArgumentNullException("password");
-        }
-        byte[] src = Convert.FromBase64String(hashedPassword);
-        if ((src.Length != 0x31) || (src[0] != 0))
-        {
-            return false;
-        }
-        byte[] dst = new byte[0x10];
-        Buffer.BlockCopy(src, 1, dst, 0, 0x10);
-        byte[] buffer3 = new byte[0x20];
-        Buffer.BlockCopy(src, 0x11, buffer3, 0, 0x20);
-        using (Rfc2898DeriveBytes bytes = new Rfc2898DeriveBytes(password, dst, 0x3e8))
-        {
-            buffer4 = bytes.GetBytes(0x20);
-        }
-        return ByteArrayContent.Equals(buffer3, buffer4);
+        ArgumentNullException.ThrowIfNull(password);
+
+        // Convert salt from DB to bytes
+        byte[] saltBytes = Convert.FromBase64String(storedSalt);
+
+        // Hash entered password with salt from DB
+        using var hmac = new HMACSHA256(saltBytes);
+        byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+        byte[] computedHashBytes = hmac.ComputeHash(passwordBytes);
+        string computedHash = Convert.ToBase64String(computedHashBytes);
+
+        // Compare passwords
+        return computedHash == storedHash;
     }
 }
