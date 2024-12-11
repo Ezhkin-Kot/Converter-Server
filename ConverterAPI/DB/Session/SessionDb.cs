@@ -15,19 +15,15 @@ public class SessionDb
     
     public static async Task<JsonResult> AuthUser(NewUser? newUser)
     {
-        var session = new Session();
         if (newUser != null)
         {
             await using var applicationDbContext = new ApplicationDbContext(Options);
-            var user = await applicationDbContext.Users.FindAsync(newUser.login);
-            if (user == null)
+            var user = await applicationDbContext.Users.FirstOrDefaultAsync(u => u.login == newUser.login);
+            if (user != null && PasswordManager.VerifyPassword(newUser.password, user.password, user.salt))
             {
-                return new JsonResult(new { success = false, error = "Invalid login or password" });
-            }
-            if (PasswordManager.VerifyHashedPassword(user.password, newUser.password))
-            {
+                var session = new Session();
                 session.userid = user.id;
-                session.datetime = DateTime.Now;
+                session.datetime = DateTime.UtcNow;
             
                 await applicationDbContext.Sessions.AddAsync(session);
                 await applicationDbContext.SaveChangesAsync();
