@@ -38,15 +38,15 @@ public static class UserDb
             var existUser = await context.Users.FirstOrDefaultAsync(u => u.login == user.login);
             if (existUser != null)
             {
-                return new JsonResult("User already exists");
+                return new JsonResult(new { message = "User already exists" });
             }
             
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
-            return new JsonResult("User successfully created");
+            return new JsonResult(new { success = true, message = "User successfully created" });
         }
-        else return new JsonResult("User not created");
+        else return new JsonResult(new { success = false, error = "Incorrect query" });
     }
 
     public static async Task<JsonResult> UpdateUser(User? updatedUser)
@@ -54,7 +54,7 @@ public static class UserDb
         if (updatedUser != null)
         {
             await using var context = new ApplicationDbContext(Options);
-            var user = await context.Users.FindAsync(updatedUser.id);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.id == updatedUser.id);
 
             if (user != null)
             {
@@ -71,6 +71,23 @@ public static class UserDb
             else return new JsonResult("User not found");
         }
         else return new JsonResult("Incorrect query");
+    }
+    
+    public static async Task<JsonResult> ChangePremium(int id, bool premium)
+    {
+        await using var context = new ApplicationDbContext(Options);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.id == id);
+
+        if (user != null)
+        {
+            user.premium = premium;
+
+            context.Users.Update(user);
+            await context.SaveChangesAsync();
+
+            return new JsonResult(new { success = true, user.premium });
+        }
+        else return new JsonResult("User not found");
     }
 
     public static async Task<JsonResult> DeleteUser(int id)
