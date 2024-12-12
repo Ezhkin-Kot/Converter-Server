@@ -81,7 +81,8 @@ public static class UserDb
         {
             return new JsonResult("User not found");
         }
-
+        
+        await SessionDb.DeleteSession(id);
         context.Users.Remove(user);
         await context.SaveChangesAsync();
 
