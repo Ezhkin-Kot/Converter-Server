@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using ConverterAPI.DB.User;
 
-public class SessionDb
+public static class SessionDb
 {
     private static readonly string ConnectionString = ConfigurationHelper.GetConnectionString("DefaultConnection");
     
@@ -33,5 +33,20 @@ public class SessionDb
             else return new JsonResult(new { success = false, error = "Invalid login or password" });
         }
         else return new JsonResult("Incorrect query");
+    }
+    
+    public static async Task<JsonResult> DeleteSession(int userid)
+    {
+        await using var context = new ApplicationDbContext(Options);
+        var session = await context.Sessions.FirstOrDefaultAsync(s => s.userid == userid);
+        if (session == null)
+        {
+            return new JsonResult("Session not found");
+        }
+
+        context.Sessions.Remove(session);
+        await context.SaveChangesAsync();
+
+        return new JsonResult("Session successfully deleted");
     }
 }
