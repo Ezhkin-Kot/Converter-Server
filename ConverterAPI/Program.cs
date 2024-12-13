@@ -15,7 +15,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.MapGet("/users", () => UserDb.GetUsers());
 app.MapGet("/users/{id:int}", (int id) => UserDb.GetUserById(id));
