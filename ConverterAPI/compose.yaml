@@ -1,30 +1,25 @@
-﻿networks:
-  converterapi-dev:
-    driver: bridge
-services:
-  app:
-    container_name: converterapi
+﻿services:
+  api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
-    networks:
-      - converterapi-dev
+      - "8080:8080"
+    container_name: converter_api
     depends_on:
       - aboba_db
   aboba_db:
-    container_name: AbobaDB
     image: postgres:latest
-    environment:
-      POSTGRES_USER: "aboba"
-      POSTGRES_PASSWORD: "aboba123"
-      POSTGRES_DB: "Aboba"
     ports:
       - "5433:5432"
-    networks:
-      - converterapi-dev
+    environment:
+      POSTGRES_USER: aboba
+      POSTGRES_PASSWORD: aboba123
     volumes:
-      - aboba-data:/var/lib/postgresql/data
+      - aboba_data:/var/lib/postgresql/data
+    container_name: aboba_db
 volumes:
-  aboba-data:
+  aboba_data:
