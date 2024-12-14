@@ -13,7 +13,6 @@
         "packagesPath": "/Users/ezhkinkot/.nuget/packages/",
         "outputPath": "/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/",
         "projectStyle": "PackageReference",
-        "UsingMicrosoftNETSdk": false,
         "configFilePaths": [
           "/Users/ezhkinkot/.nuget/NuGet/NuGet.Config"
         ],
@@ -47,6 +46,18 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Npgsql": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[9.0.2, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
