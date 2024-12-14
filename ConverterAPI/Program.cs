@@ -4,6 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -16,6 +26,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 
 app.MapGet("/users", () => UserDb.GetUsers());
 app.MapGet("/users/{id:int}", (int id) => UserDb.GetUserById(id));
@@ -30,4 +41,5 @@ app.MapPut("/sessions/upd/{userid:int}", (int userid) => SessionDb.UpdAmount(use
 app.MapDelete("/users/{id:int}", (int id) => UserDb.DeleteUser(id));
 app.MapDelete("/sessions/{userid:int}", (int userid) => SessionDb.DeleteSession(userid));
 
+app.UseCors("AllowAll");
 app.Run();
