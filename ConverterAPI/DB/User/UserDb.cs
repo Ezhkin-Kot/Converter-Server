@@ -43,8 +43,9 @@ public static class UserDb
             
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
-
-            return new JsonResult(new { success = true, message = "User successfully created" });
+            
+            var createdUser = await context.Users.FirstOrDefaultAsync(u => u.login == user.login);
+            return new JsonResult(new { success = true,  createdUser });
         }
         else return new JsonResult(new { success = false, error = "Incorrect query" });
     }
