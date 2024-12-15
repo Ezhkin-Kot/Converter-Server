@@ -35,7 +35,7 @@ public static class SessionDb
                 var session = await context.Sessions.OrderBy(s => s.sessionid).LastOrDefaultAsync(s => s.userid == user.id);
                 if (session is { active: true })
                 {
-                    return new JsonResult(new { success = true, message = "Connect to existing session" });
+                    return new JsonResult(new { success = true, user });
                 }
                 else
                 {
@@ -48,7 +48,7 @@ public static class SessionDb
                     await context.Sessions.AddAsync(session);
                     await context.SaveChangesAsync();
 
-                    return new JsonResult(new { success = true, message = "New session started" });
+                    return new JsonResult(new { success = true, user });
                 }
             }
             else return new JsonResult(new { success = false, error = "Invalid login or password" });
