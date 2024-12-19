@@ -13,16 +13,40 @@ public static class UserDb
         .UseNpgsql(ConnectionString)
         .Options;
 
-    public static async Task<List<User>> GetUsers()
+    public static async Task<JsonResult> GetUsers()
     {
         await using var context = new ApplicationDbContext(Options);
-        return await context.Users.ToListAsync();
+        var publicUsers = await context.Users
+            .Select(user => new PublicUser
+            {
+                id = user.id,
+                login = user.login,
+                premium = user.premium
+            })
+            .ToListAsync();
+        if (publicUsers.Count == 0)
+        {
+            return new JsonResult(new { message = "There are no users." });
+        }
+        
+        return new JsonResult( new { users = publicUsers} );
     }
 
-    public static async Task<User?> GetUserById(int id)
+    public static async Task<JsonResult> GetUserById(int id)
     {
         await using var context = new ApplicationDbContext(Options);
-        return await context.Users.FindAsync(id);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.id == id);
+        if (user == null)
+        {
+            return new JsonResult(new { success = false, message = "User not found." });
+        }
+
+        PublicUser publicUser = new PublicUser();
+        publicUser.id = user.id;
+        publicUser.login = user.login;
+        publicUser.premium = user.premium;
+        
+        return new JsonResult(new { success = true, user = publicUser });
     }
 
     public static async Task<JsonResult> CreateUser(NewUser? newUser)
@@ -30,22 +54,22 @@ public static class UserDb
         if (newUser != null)
         {
             await using var context = new ApplicationDbContext(Options);
-            var user = new User();
-            user.login = newUser.login;
-            (user.password, user.salt) = PasswordManager.HashPassword(newUser.password);
-            user.premium = false;
+            var createdUser = new User();
+            createdUser.login = newUser.login;
+            (createdUser.password, createdUser.salt) = PasswordManager.HashPassword(newUser.password);
+            createdUser.premium = false;
             
-            var existUser = await context.Users.FirstOrDefaultAsync(u => u.login == user.login);
+            var existUser = await context.Users.FirstOrDefaultAsync(u => u.login == createdUser.login);
             if (existUser != null)
             {
                 return new JsonResult(new { message = "User already exists" });
             }
             
-            await context.Users.AddAsync(user);
+            await context.Users.AddAsync(createdUser);
             await context.SaveChangesAsync();
             
-            var createdUser = await context.Users.FirstOrDefaultAsync(u => u.login == user.login);
-            return new JsonResult(new { success = true,  user = createdUser });
+            var user = await context.Users.FirstOrDefaultAsync(u => u.login == createdUser.login);
+            return new JsonResult(new { success = true, user });
         }
         else return new JsonResult(new { success = false, error = "Incorrect query" });
     }
