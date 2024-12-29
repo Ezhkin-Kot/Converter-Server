@@ -16,6 +16,7 @@
     ports:
       - "5433:5432"
     environment:
+      POSTGRES_DB: abobadb
       POSTGRES_USER: aboba
       POSTGRES_PASSWORD: aboba123
     volumes:
