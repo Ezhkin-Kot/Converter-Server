@@ -21,6 +21,7 @@
       POSTGRES_PASSWORD: aboba123
     volumes:
       - aboba_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     container_name: aboba_db
 volumes:
   aboba_data:
