@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ConverterAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("sessions")]
 public class SessionsController(ApplicationDbContext context) : ControllerBase
 {
     [HttpGet]
