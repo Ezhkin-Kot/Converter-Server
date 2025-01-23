@@ -1,8 +1,13 @@
-using ConverterAPI.Controllers;
 using ConverterAPI.Models;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Connection to DB
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddCors(options =>
 {
@@ -15,10 +20,14 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {
@@ -28,20 +37,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
-app.MapGet("/users", () => UserDb.GetUsers());
-app.MapGet("/users/{id:int}", (int id) => UserDb.GetUserById(id));
-app.MapPost("/users/reg", ([FromBody] NewUser newUser) => UserDb.CreateUser(newUser));
-app.MapPut("/users", ([FromBody] User updUser) => UserDb.UpdateUser(updUser));
-app.MapPut("/users/prem/{id:int}/{premium:bool}", (int id, bool premium) => UserDb.ChangePremium(id, premium));
-app.MapDelete("/users/{id:int}", (int id) => UserDb.DeleteUser(id));
-
-app.MapGet("/sessions", () => SessionDb.GetSessions());
-app.MapGet("/sessions/{userid:int}", (int userid) => SessionDb.GetSessionByUserId(userid));
-app.MapPost("/sessions/auth", ([FromBody] NewUser newUser) => SessionDb.AuthUser(newUser));
-app.MapPut("/sessions/close/{userid:int}", (int userid) => SessionDb.CloseSession(userid));
-app.MapPut("/sessions/upd/{userid:int}", (int userid) => SessionDb.UpdAmount(userid));
-app.MapDelete("/sessions/{userid:int}", (int userid) => SessionDb.DeleteSession(userid));
 
 app.UseCors("AllowAll"); // Change when real using!
 app.Run();
