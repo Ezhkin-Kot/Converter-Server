@@ -32,6 +32,7 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
     public async Task<IActionResult> GetUserById(int id)
     {
         var user = await context.Users.FirstOrDefaultAsync(u => u.id == id);
+        
         if (user == null)
         {
             return NotFound(new { message = "User not found." });
@@ -63,6 +64,7 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
         (createdUser.password, createdUser.salt) = PasswordManager.HashPassword(newUser.password);
         
         var existUser = await context.Users.FirstOrDefaultAsync(u => u.login == createdUser.login);
+        
         if (existUser != null)
         {
             return Conflict(new { message = "User already exists." });
@@ -71,7 +73,7 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
         await context.Users.AddAsync(createdUser);
         await context.SaveChangesAsync();
         
-        return CreatedAtAction(nameof(GetUserById), new { createdUser.id}, 
+        return CreatedAtAction(nameof(GetUserById), new { createdUser.id }, 
             new { message = $"User {createdUser.login} successfully created." });
     }
 
@@ -130,7 +132,6 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
             return NotFound(new { message = "User not found." });
         }
         
-        await SessionsController.DeleteSession(id);
         context.Users.Remove(user);
         await context.SaveChangesAsync();
 
