@@ -1203,7 +1203,6 @@
       "packagesPath": "/Users/ezhkinkot/.nuget/packages/",
       "outputPath": "/Users/ezhkinkot/Projects/WEB/Converter-Server/ConverterAPI/obj/",
       "projectStyle": "PackageReference",
-      "UsingMicrosoftNETSdk": false,
       "configFilePaths": [
         "/Users/ezhkinkot/.nuget/NuGet/NuGet.Config"
       ],
