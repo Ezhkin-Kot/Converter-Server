@@ -1,11 +1,12 @@
-using ConverterAPI.DB.Session;
-using ConverterAPI.DB.User;
+using ConverterAPI.Controllers;
+using ConverterAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
+    // Change when real using!
     options.AddPolicy(name: "AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
@@ -42,5 +43,5 @@ app.MapPut("/sessions/close/{userid:int}", (int userid) => SessionDb.CloseSessio
 app.MapPut("/sessions/upd/{userid:int}", (int userid) => SessionDb.UpdAmount(userid));
 app.MapDelete("/sessions/{userid:int}", (int userid) => SessionDb.DeleteSession(userid));
 
-app.UseCors("AllowAll");
+app.UseCors("AllowAll"); // Change when real using!
 app.Run();

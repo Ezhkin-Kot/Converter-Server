@@ -1,8 +1,8 @@
-namespace ConverterAPI.DB.User;
-
-using Microsoft.EntityFrameworkCore;
+using ConverterAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using ConverterAPI.DB.Session;
+using Microsoft.EntityFrameworkCore;
+
+namespace ConverterAPI.Controllers;
 
 public static class UserDb
 {
@@ -54,7 +54,7 @@ public static class UserDb
         if (newUser != null)
         {
             await using var context = new ApplicationDbContext(Options);
-            var createdUser = new User();
+            var createdUser = new Models.User();
             createdUser.login = newUser.login;
             (createdUser.password, createdUser.salt) = PasswordManager.HashPassword(newUser.password);
             createdUser.premium = false;
@@ -74,7 +74,7 @@ public static class UserDb
         else return new JsonResult(new { success = false, error = "Incorrect query" });
     }
 
-    public static async Task<JsonResult> UpdateUser(User? updatedUser)
+    public static async Task<JsonResult> UpdateUser(Models.User? updatedUser)
     {
         if (updatedUser != null)
         {

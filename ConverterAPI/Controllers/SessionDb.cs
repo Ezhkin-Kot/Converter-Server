@@ -1,8 +1,8 @@
-namespace ConverterAPI.DB.Session;
-
-using Microsoft.EntityFrameworkCore;
+using ConverterAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using ConverterAPI.DB.User;
+using Microsoft.EntityFrameworkCore;
+
+namespace ConverterAPI.Controllers;
 
 public static class SessionDb
 {
@@ -13,12 +13,12 @@ public static class SessionDb
         .UseNpgsql(ConnectionString)
         .Options;
 
-    public static async Task<List<Session>> GetSessions()
+    public static async Task<List<Models.Session>> GetSessions()
     {
         await using var context = new ApplicationDbContext(Options);
         return await context.Sessions.ToListAsync();
     }
-    public static async Task<Session?> GetSessionByUserId(int userid)
+    public static async Task<Models.Session?> GetSessionByUserId(int userid)
     {
         await using var context = new ApplicationDbContext(Options);
         return await context.Sessions.OrderBy(s => s.sessionid).LastOrDefaultAsync(s => s.userid == userid);
@@ -39,7 +39,7 @@ public static class SessionDb
                 }
                 else
                 {
-                    session = new Session();
+                    session = new Models.Session();
                     session.userid = user.id;
                     session.datetime = DateTime.UtcNow;
                     session.amount = 5;
