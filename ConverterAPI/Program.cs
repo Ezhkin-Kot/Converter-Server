@@ -4,16 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Connection to DBs
 var postgresConnectionString = builder.Configuration.GetConnectionString("Postgres");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(postgresConnectionString));
 
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
 builder.Services.AddSingleton<SessionService>();
-
-// Connection to DB
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(postgresConnectionString));
 
 builder.Services.AddCors(options =>
 {
