@@ -11,6 +11,8 @@
     container_name: converter_api
     depends_on:
       - aboba_db
+      - rediska
+  
   aboba_db:
     image: postgres:latest
     ports:
@@ -23,5 +25,14 @@
       - aboba_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     container_name: aboba_db
+  
+  rediska:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - rediska_data:/data
 volumes:
   aboba_data:
+  rediska_data:
