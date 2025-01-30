@@ -1,13 +1,19 @@
-using ConverterAPI.Models;
+using ConverterAPI.Services;
+using StackExchange.Redis;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var postgresConnectionString = builder.Configuration.GetConnectionString("Postgres");
+
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+
+builder.Services.AddSingleton<SessionService>();
 
 // Connection to DB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(postgresConnectionString));
 
 builder.Services.AddCors(options =>
 {
