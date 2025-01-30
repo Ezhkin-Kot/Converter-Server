@@ -100,6 +100,7 @@ public class SessionsController(ApplicationDbContext postgresDbContext, SessionS
         if (user.premium)
         {
             session.amount = 5;
+            await redisSessionService.UpdateSessionAsync(user.id, s => s.amount = 5);
             return Ok(new { session.amount, message = "Amount unlimited." });
         }
         
@@ -109,6 +110,7 @@ public class SessionsController(ApplicationDbContext postgresDbContext, SessionS
         }
 
         await redisSessionService.UpdateSessionAsync(user.id, s => s.amount--);
+        session.amount--;
 
         return Ok(new { session.amount, message = "Amount updated" });
     }
