@@ -3,6 +3,7 @@
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+      - REDIS_CONNECTION=rediska:6379
     build:
       context: .
       dockerfile: Dockerfile
@@ -33,6 +34,7 @@
     command: redis-server --appendonly yes
     volumes:
       - rediska_data:/data
+    container_name: rediska
 volumes:
   aboba_data:
   rediska_data:
