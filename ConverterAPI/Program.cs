@@ -40,6 +40,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Sessions expiry listener for restoring active sessions
+using (var scope = app.Services.CreateScope())
+{
+    var sessionService = scope.ServiceProvider.GetRequiredService<SessionService>();
+    
+    await Task.Run(() => sessionService.WatchSessionExpiry());
+}
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
