@@ -7,7 +7,7 @@ namespace ConverterAPI.Services;
 public class SessionService(IConnectionMultiplexer redis)
 {
     private readonly IDatabase _db = redis.GetDatabase();
-    private readonly TimeSpan _sessionLifeTime = TimeSpan.FromHours(24); // Sessions TTL
+    private readonly TimeSpan _sessionLifeTime = TimeSpan.FromSeconds(20); // Sessions TTL
 
     public async Task<List<Session>> GetSessionsAsync()
     {
@@ -42,35 +42,81 @@ public class SessionService(IConnectionMultiplexer redis)
         
         await _db.StringSetAsync(sessionKey, sessionData, _sessionLifeTime);
         await _db.SetAddAsync("sessions", sessionKey); // Add key in set for fast GetSessions
+        await _db.StringSetAsync($"session_active:{session.userid}", "true"); // Add key for session restore
     }
 
-    public async Task<bool> UpdateSessionAsync(int userId, Action<Session> updateAction)
+    public async Task UpdateSessionAsync(int userId, Action<Session> updateAction)
     {
         var sessionKey = $"session:{userId}";
+        var sessionActiveKey = $"session_active:{userId}";
+        
         var sessionData = await _db.StringGetAsync(sessionKey);
-
         if (sessionData.IsNullOrEmpty)
         {
-            return false;
+            return;
         }
         
         var session = JsonSerializer.Deserialize<Session>(sessionData!);
         if (session == null)
         {
-            return false;
+            return;
         }
+        
+        var oldActive = session.active;
         
         updateAction(session);
         
         await _db.StringSetAsync(sessionKey, JsonSerializer.Serialize(session));
-        return true;
+        if (oldActive != session.active)
+        {
+            if (session.active)
+            {
+                await _db.StringSetAsync(sessionActiveKey, "true");
+            }
+            else if (!session.active)
+            {
+                await _db.KeyDeleteAsync(sessionActiveKey);
+            }
+        }
     }
 
-    public async Task<bool> DeleteSessionAsync(int userId)
+    public async Task DeleteSessionAsync(int userId)
     {
-        string sessionKey = $"session:{userId}";
+        var sessionKey = $"session:{userId}";
+        var sessionActiveKey = $"session_active:{userId}";
         
         await _db.KeyDeleteAsync(sessionKey);
-        return await _db.SetRemoveAsync("sessions", sessionKey);
+        await _db.SetRemoveAsync("sessions", sessionKey);
+        await _db.KeyDeleteAsync(sessionActiveKey);
+    }
+    
+    public async Task WatchSessionExpiry()
+    {
+        var subscriber = redis.GetSubscriber();
+        
+        await subscriber.SubscribeAsync("__keyevent@0__:expired", async void (channel, key) =>
+        {
+            var keyString = key.ToString();
+
+            if (keyString.StartsWith("session:"))
+            {
+                var userId = int.Parse(keyString.Split(':')[1]);
+                var sessionActiveKey = $"session_active:{userId}";
+    
+                var isActive = await _db.StringGetAsync(sessionActiveKey);
+                if (isActive.HasValue && isActive.ToString() == "true")
+                {
+                    var newSession = new Session
+                    {
+                        userid = userId,
+                        datetime = DateTime.UtcNow,
+                        amount = 5,
+                        active = true
+                    };
+
+                    await CreateSessionAsync(newSession);
+                }
+            }
+        });
     }
 }

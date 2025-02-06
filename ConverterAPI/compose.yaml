@@ -31,7 +31,7 @@
     image: redis:latest
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --notify-keyspace-events Ex
     volumes:
       - rediska_data:/data
     container_name: rediska
