@@ -63,10 +63,17 @@ public class SessionService(IConnectionMultiplexer redis)
         }
         
         var oldActive = session.active;
+        var ttl = await _db.KeyTimeToLiveAsync(sessionKey);
         
         updateAction(session);
         
         await _db.StringSetAsync(sessionKey, JsonSerializer.Serialize(session));
+        
+        if (ttl.HasValue)
+        {
+            await _db.KeyExpireAsync(sessionKey, ttl);
+        }
+        
         if (oldActive != session.active)
         {
             if (session.active)
