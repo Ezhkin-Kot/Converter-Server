@@ -7,7 +7,7 @@ namespace ConverterAPI.Services;
 public class SessionService(IConnectionMultiplexer redis)
 {
     private readonly IDatabase _db = redis.GetDatabase();
-    private readonly TimeSpan _sessionLifeTime = TimeSpan.FromSeconds(20); // Sessions TTL
+    private readonly TimeSpan _sessionLifeTime = TimeSpan.FromHours(24); // Sessions TTL
 
     public async Task<List<Session>> GetSessionsAsync()
     {
