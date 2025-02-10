@@ -90,7 +90,7 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
         
         if (user == null || PasswordManager.VerifyPassword(updatedUser.currentPassword, user.password, user.salt))
         {
-            return NotFound(new { message = "Invalid login or password." });
+            return Unauthorized(new { message = "Invalid login or password." });
         }
         
         user.login = updatedUser.newLogin ?? user.login;
