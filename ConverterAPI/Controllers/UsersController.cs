@@ -81,7 +81,7 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
     [HttpPatch]
     public async Task<IActionResult> UpdateUser([FromBody] UpdatedUser? updatedUser)
     {
-        if (updatedUser == null)
+        if (updatedUser?.currentLogin == null || updatedUser.currentPassword == null)
         {
             return BadRequest(new { message = "Invalid request." });
         }
@@ -91,7 +91,7 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
         if (user == null)
         {
             // Fake password verification for security
-            PasswordManager.VerifyPassword(updatedUser.currentPassword, updatedUser.newPassword, "aboba");
+            PasswordManager.VerifyPassword(updatedUser.currentPassword, updatedUser.currentLogin, "s+abobaAboBA9+0wUpvS0g==");
             return Unauthorized(new { message = "Invalid login or password." });
         }
         if (!PasswordManager.VerifyPassword(updatedUser.currentPassword, user.password, user.salt))
