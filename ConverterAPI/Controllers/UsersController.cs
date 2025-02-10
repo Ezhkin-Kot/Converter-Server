@@ -79,25 +79,25 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
     }
 
     [HttpPatch]
-    public async Task<IActionResult> UpdateUser([FromBody] User? updatedUser)
+    public async Task<IActionResult> UpdateUser([FromBody] UpdatedUser? updatedUser)
     {
         if (updatedUser == null)
         {
             return BadRequest(new { message = "Invalid request." });
         }
         
-        var user = await context.Users.FirstOrDefaultAsync(u => u.id == updatedUser.id);
-
-        if (user == null)
+        var user = await context.Users.FirstOrDefaultAsync(u => u.login == updatedUser.currentLogin);
+        
+        if (user == null || PasswordManager.VerifyPassword(updatedUser.currentPassword, user.password, user.salt))
         {
-            return NotFound(new { message = "User not found." });
+            return NotFound(new { message = "Invalid login or password." });
         }
         
-        user.login = updatedUser.login ?? user.login;
-        (user.password, user.salt) = (updatedUser.password != null) ? 
-            PasswordManager.HashPassword(updatedUser.password) : (user.password, user.salt);
+        user.login = updatedUser.newLogin ?? user.login;
+        (user.password, user.salt) = (updatedUser.newPassword != null) ? 
+            PasswordManager.HashPassword(updatedUser.newPassword) : (user.password, user.salt);
         user.premium = updatedUser.premium;
-
+        
         context.Users.Update(user);
         await context.SaveChangesAsync();
 
