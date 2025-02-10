@@ -77,7 +77,7 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
         return CreatedAtAction(nameof(GetUserById), new { createdUser.id }, 
             new { message = $"User {createdUser.login} successfully created." });
     }
-
+    
     [HttpPatch]
     public async Task<IActionResult> UpdateUser([FromBody] UpdatedUser? updatedUser)
     {
@@ -87,8 +87,14 @@ public class UsersController(ApplicationDbContext context) : ControllerBase
         }
         
         var user = await context.Users.FirstOrDefaultAsync(u => u.login == updatedUser.currentLogin);
-        
-        if (user == null || PasswordManager.VerifyPassword(updatedUser.currentPassword, user.password, user.salt))
+
+        if (user == null)
+        {
+            // Fake password verification for security
+            PasswordManager.VerifyPassword(updatedUser.currentPassword, updatedUser.newPassword, "aboba");
+            return Unauthorized(new { message = "Invalid login or password." });
+        }
+        if (!PasswordManager.VerifyPassword(updatedUser.currentPassword, user.password, user.salt))
         {
             return Unauthorized(new { message = "Invalid login or password." });
         }
