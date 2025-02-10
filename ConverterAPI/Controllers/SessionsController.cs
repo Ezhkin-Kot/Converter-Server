@@ -45,7 +45,14 @@ public class SessionsController(ApplicationDbContext postgresDbContext, SessionS
         
         var user = await postgresDbContext.Users.FirstOrDefaultAsync(u => u.login == newUser.login);
 
-        if (user == null || !PasswordManager.VerifyPassword(newUser.password, user.password, user.salt))
+        if (user == null)
+        {
+            // Fake password verification for security
+            PasswordManager.VerifyPassword(newUser.password, newUser.password, "aboba");
+            return Unauthorized(new { message = "Invalid login or password" });
+        }
+
+        if (!PasswordManager.VerifyPassword(newUser.password, user.password, user.salt))
         {
             return Unauthorized(new { message = "Invalid login or password" });
         }
